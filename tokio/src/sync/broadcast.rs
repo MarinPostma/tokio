@@ -924,7 +924,7 @@ impl<T> Drop for Receiver<T> {
 impl<T> Drop for Shared<T> {
     fn drop(&mut self) {
         // Clear the wait stack
-        let mut curr = *self.wait_stack.get_mut() as *const WaitNode;
+        let mut curr = self.wait_stack.with_mut(|ptr| *ptr as *const WaitNode);
 
         while !curr.is_null() {
             let waiter = unsafe { Arc::from_raw(curr) };

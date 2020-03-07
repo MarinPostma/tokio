@@ -669,7 +669,7 @@ unsafe impl<T: Send> Sync for Inner<T> {}
 
 impl<T> Drop for Inner<T> {
     fn drop(&mut self) {
-        let state = State(*self.state.get_mut());
+        let state = State(self.state.with_mut(|v| *v));
 
         if state.is_rx_task_set() {
             unsafe {

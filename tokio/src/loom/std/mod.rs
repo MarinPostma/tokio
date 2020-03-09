@@ -4,10 +4,10 @@ mod atomic_ptr;
 mod atomic_u32;
 mod atomic_u64;
 mod atomic_usize;
-mod causal_cell;
+mod unsafe_cell;
 
 pub(crate) mod cell {
-    pub(crate) use super::causal_cell::{CausalCell, CausalCheck};
+    pub(crate) use super::unsafe_cell::UnsafeCell;
 }
 
 #[cfg(any(feature = "sync", feature = "io-driver"))]

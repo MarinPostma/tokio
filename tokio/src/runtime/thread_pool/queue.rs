@@ -1,6 +1,6 @@
 //! Run-queue structures to support a work-stealing scheduler
 
-use crate::loom::cell::{CausalCell, CausalCheck};
+use crate::loom::cell::UnsafeCell;
 use crate::loom::sync::atomic::{self, AtomicU32, AtomicUsize};
 use crate::loom::sync::{Arc, Mutex};
 use crate::runtime::task;
@@ -42,7 +42,7 @@ pub(super) struct Inner<T: 'static> {
     tail: AtomicU32,
 
     /// Elements
-    buffer: Box<[CausalCell<MaybeUninit<task::Notified<T>>>]>,
+    buffer: Box<[UnsafeCell<MaybeUninit<task::Notified<T>>>]>,
 }
 
 struct Pointers {
@@ -79,7 +79,7 @@ pub(super) fn local<T: 'static>() -> (Steal<T>, Local<T>) {
     let mut buffer = Vec::with_capacity(LOCAL_QUEUE_CAPACITY);
 
     for _ in 0..LOCAL_QUEUE_CAPACITY {
-        buffer.push(CausalCell::new(MaybeUninit::uninit()));
+        buffer.push(UnsafeCell::new(MaybeUninit::uninit()));
     }
 
     let inner = Arc::new(Inner {
@@ -353,7 +353,7 @@ impl<T> Steal<T> {
                 continue;
             }
 
-            // Track CausalCell causality checks. The check is deferred until
+            // Track UnsafeCell causality checks. The check is deferred until
             // the compare_and_swap claims ownership of the tasks.
             let mut check = CausalCheck::default();
 
